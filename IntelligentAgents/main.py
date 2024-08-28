@@ -120,17 +120,33 @@ while loop:
             def heuristics(self):
                 return sum(1 for i, stack in enumerate(self.state) if stack != self.goal_state[i])
 
+            # def getSuccessors(self, heuristic):
+            #     children = []
+            #     for i, stack in enumerate(self.state):
+            #         if not stack:
+            #             continue
+            #         for j in range(len(self.state)):
+            #             if i != j:
+            #                 new_state = copy.deepcopy(self.state)
+            #                 block = new_state[i].pop()
+            #                 new_state[j].append(block)
+            #                 child = NodeBlocks(new_state, self.goal_state, parent=self)
+            #                 children.append(child)
+            #     return children
+
             def getSuccessors(self, heuristic):
                 children = []
                 for i, stack in enumerate(self.state):
-                    if not stack:
-                        continue
-                    for j in range(len(self.state)):
-                        if i != j:
-                            new_state = copy.deepcopy(self.state)
-                            block = new_state[i].pop()
-                            new_state[j].append(block)
-                            child = NodeBlocks(new_state, self.goal_state, parent=self)
+                    for j, stack1 in enumerate(self.state):
+                        if i != j and len(stack1):
+                            temp = copy.deepcopy(stack)
+                            child = copy.deepcopy(self)
+                            temp1 = copy.deepcopy(stack1)
+                            temp.append(temp1[-1])
+                            del temp1[-1]
+                            child.state[i] = temp
+                            child.state[j] = temp1
+                            child.parent = copy.deepcopy(self)
                             children.append(child)
                 return children
 
@@ -228,6 +244,7 @@ while loop:
                     return True
                 else:
                     return False
+
 
         aStarSearch(NodeWater((0, 0), [], 0, 0), waterHeuristic)
 
