@@ -120,20 +120,6 @@ while loop:
             def heuristics(self):
                 return sum(1 for i, stack in enumerate(self.state) if stack != self.goal_state[i])
 
-            # def getSuccessors(self, heuristic):
-            #     children = []
-            #     for i, stack in enumerate(self.state):
-            #         if not stack:
-            #             continue
-            #         for j in range(len(self.state)):
-            #             if i != j:
-            #                 new_state = copy.deepcopy(self.state)
-            #                 block = new_state[i].pop()
-            #                 new_state[j].append(block)
-            #                 child = NodeBlocks(new_state, self.goal_state, parent=self)
-            #                 children.append(child)
-            #     return children
-
             def getSuccessors(self, heuristic):
                 children = []
                 for i, stack in enumerate(self.state):
@@ -168,89 +154,140 @@ while loop:
 
         aStarSearch(NodeBlocks(startSt, finalSt), lambda state: 0)
 
+
+
     elif choice == 2:
+
         print("Water Jug has been selected")
 
-        data1 = int(input("Liters/Gallons in Jug 1: "))
-        data2 = int(input("Liters/Gallons in Jug 2: "))
-        while data1 < 0 or data2 < 0:
-            print("Please enter positive numbers only.")
-            data1 = int(input("Liters/Gallons in Jug 1: "))
-            data2 = int(input("Liters/Gallons in Jug 2: "))
-        t = (data1, data2)
+        # Input for number of jugs
+
+        num_jugs = int(input("Enter number of jugs: "))
+
+        capacities_list = []
+
+        initial_state = []
+
+        goal_state = []
+
+        # Input capacities
+
+        for i in range(num_jugs):
+            capacity = int(input(f"Capacity of Jug {i + 1}: "))
+
+            capacities_list.append(capacity)
+
+        # Input initial amounts
+
+        for i in range(num_jugs):
+            amount = int(input(f"Initial amount in Jug {i + 1}: "))
+
+            initial_state.append(amount)
+
+        # Input goal amounts
+
+        for i in range(num_jugs):
+            amount = int(input(f"Goal amount in Jug {i + 1}: "))
+
+            goal_state.append(amount)
 
 
-        def getSuccessorsWater(J1, J2):
+        def getSuccessorsWater(state):
+
             successors = []
-            (C1, C2) = t
 
-            if J1 < C1:
-                successors.append(((C1, J2), 'Fill Jug 1', 1))
-            if J2 < C2:
-                successors.append(((J1, C2), 'Fill Jug 2', 1))
-            if J1 > 0:
-                successors.append(((0, J2), 'Empty Jug 1', 1))
-            if J2 > 0:
-                successors.append(((J1, 0), 'Empty Jug 2', 1))
+            capacities = capacities_list
 
-            if J1 + J2 <= C1:
-                alpha = J1 + J2
-                successors.append(((alpha, 0), 'Pour all from Jug 2 into Jug 1', 1))
-            if J1 + J2 <= C2:
-                alpha = J1 + J2
-                successors.append(((0, alpha), 'Pour all from Jug 1 into Jug 2', 1))
-            if J1 + J2 > C1:
-                alpha = J1 + J2 - C1
-                successors.append(((C1, alpha), 'Fill Jug 1 from Jug 2', 1))
-            if J1 + J2 > C2:
-                alpha = J1 + J2 - C2
-                successors.append(((alpha, C2), 'Fill Jug 2 from Jug 1', 1))
+            for i in range(len(state)):
+
+                if state[i] < capacities[i]:
+                    successors.append((state[:i] + (capacities[i],) + state[i + 1:], f'Fill Jug {i + 1}', 1))
+
+                if state[i] > 0:
+                    successors.append((state[:i] + (0,) + state[i + 1:], f'Empty Jug {i + 1}', 1))
+
+                for j in range(len(state)):
+
+                    if i != j:
+
+                        transfer_amount = min(state[i], capacities[j] - state[j])
+
+                        if transfer_amount > 0:
+                            new_state = list(state)
+
+                            new_state[i] -= transfer_amount
+
+                            new_state[j] += transfer_amount
+
+                            successors.append((tuple(new_state), f'Pour from Jug {i + 1} to Jug {j + 1}', 1))
 
             return successors
 
 
         def waterHeuristic(state):
-            return abs(state[0] - 2)
+
+            return sum(abs(state[i] - goal_state[i]) for i in range(len(state)))
 
 
         class NodeWater:
-            def __init__(self, state, path, cost=0, heuristic=0):
+
+            def __init__(self, state, goal_state, path, cost=0, heuristic=0):
+
                 self.state = state
+
+                self.goal_state = goal_state
+
                 self.path = path
+
                 self.cost = cost
+
                 self.heuristic = heuristic
 
             def getSuccessors(self, heuristicFunction=None):
+
                 children = []
-                for successor in getSuccessorsWater(self.state[0], self.state[1]):
+
+                for successor in getSuccessorsWater(self.state):
                     state = successor[0]
+
                     path = list(self.path)
+
                     path.append(successor[1])
+
                     cost = self.cost + successor[2]
-                    if heuristicFunction:
-                        heuristic = heuristicFunction(self.state)
-                    else:
-                        heuristic = 0
-                    node = NodeWater(state, path, cost, heuristic)
+
+                    heuristic = heuristicFunction(state) if heuristicFunction else 0
+
+                    node = NodeWater(state, self.goal_state, path, cost, heuristic)
+
                     children.append(node)
+
                 return children
 
             def pathCost(self):
+
                 return self.cost + self.heuristic
 
             def goalTest(self):
-                if self.state[0] == 2:
-                    print(self.path)
+
+                if self.state == self.goal_state:
+                    print("Solution Found! Path to goal:", self.path)
+
                     return True
-                else:
-                    return False
+
+                return False
 
 
-        aStarSearch(NodeWater((0, 0), [], 0, 0), waterHeuristic)
+        aStarSearch(NodeWater(tuple(initial_state), tuple(goal_state), [], 0, 0), waterHeuristic)
+
 
     elif choice == 3:
+
         print("Exit has been selected")
+
         loop = False  # End the while loop
 
+
     else:
+
         input("Wrong option selection. Enter any key to try again..")
