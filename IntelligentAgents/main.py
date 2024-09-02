@@ -101,8 +101,8 @@ def visualize_blocks_world(state):
         visualization += "\n"
 
     visualization += "_____" * len(state) + "\n"
-    for i in range(len(state)):
-        visualization += f"  {i + 1}  "
+    for ib in range(len(state)):
+        visualization += f"  {ib + 1}  "
 
     visualization += "\n"
     visualization += "\n"
@@ -157,7 +157,6 @@ while True:
             print("Please enter positive numbers only.")
             stacks = int(input("Stacks: "))
             blocks = int(input("Blocks: "))
-
 
         # Function to generate a random state
         def generate_random_state(stacks, blocks):
@@ -263,19 +262,19 @@ while True:
         def getSuccessorsWater(state):
             successors = []
             capacities = capacities_list
-            for i in range(len(state)):
-                if state[i] < capacities[i]:
-                    successors.append((state[:i] + (capacities[i],) + state[i + 1:], f'Fill Jug {i + 1}', 1))
-                if state[i] > 0:
-                    successors.append((state[:i] + (0,) + state[i + 1:], f'Empty Jug {i + 1}', 1))
+            for idx in range(len(state)):
+                if state[idx] < capacities[idx]:
+                    successors.append((state[:idx] + (capacities[idx],) + state[idx + 1:], f'Fill Jug {idx + 1}', 1))
+                if state[idx] > 0:
+                    successors.append((state[:idx] + (0,) + state[idx + 1:], f'Empty Jug {idx + 1}', 1))
                 for j in range(len(state)):
-                    if i != j:
-                        transfer_amount = min(state[i], capacities[j] - state[j])
+                    if idx != j:
+                        transfer_amount = min(state[idx], capacities[j] - state[j])
                         if transfer_amount > 0:
                             new_state = list(state)
-                            new_state[i] -= transfer_amount
+                            new_state[idx] -= transfer_amount
                             new_state[j] += transfer_amount
-                            successors.append((tuple(new_state), f'Pour from Jug {i + 1} to Jug {j + 1}', 1))
+                            successors.append((tuple(new_state), f'Pour from Jug {idx + 1} to Jug {j + 1}', 1))
             return successors
 
 
