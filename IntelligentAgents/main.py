@@ -98,13 +98,18 @@ def visualize_blocks_world(state):
             else:
                 visualization += "  .  "
         visualization += "\n"
+        visualization += "\n"
 
-    visualization += "-----" * len(state) + "\n"
+    visualization += "_____" * len(state) + "\n"
     for i in range(len(state)):
         visualization += f"  {i + 1}  "
+
+    visualization += "\n"
     visualization += "\n"
 
     print(visualization)
+
+
 
 
 def visualize_water_jugs(state, capacities):
@@ -114,30 +119,25 @@ def visualize_water_jugs(state, capacities):
     visualization = ""
     max_capacity = max(capacities)
 
-    for level in range(max_capacity, 0, -1):
-        line = ""
-        for i, amount in enumerate(state):
-            if amount >= level:
-                line += f" |   █   |  "
+    for level in reversed(range(max_capacity + 1)):
+        for i in range(len(state)):
+            if state[i] >= level:
+                visualization += "  | ⊟ |  "
+            elif level == 0:
+                visualization += f" [{capacities[i]}] "
             else:
-                line += f" |         |  "
-        visualization += line.rstrip() + "\n"
+                visualization += "  |   |  "
+        visualization += "\n"
 
     bottom_line = ""
     for i in range(len(state)):
-        bottom_line += " |______|  "
+        bottom_line += "  |___|  "
     visualization += bottom_line.rstrip() + "\n"
-
-    # state_line = ""
-    # for i, amount in enumerate(state):
-    #     amount_str = str(amount)
-    #     padding = (10 - len(amount_str)) // 2
-    #     state_line += f"{' ' * padding}{amount_str}{' ' * (10 - len(amount_str) - padding)}"
-    # visualization += state_line.rstrip() + "\n"
 
     state_line = ""
     for i, amount in enumerate(state):
-        state_line += f"      {amount}        "
+        state_line += (f"    {amount}  "
+                       f"  ")
     visualization += state_line.rstrip() + "\n"
 
     print(visualization)
