@@ -141,86 +141,80 @@ while True:
             stacks = int(input("Stacks: "))
             blocks = int(input("Blocks: "))
 
+        # Function to generate a random state
+        def generate_random_state(stacks, blocks):
+            all_blocks = list(string.ascii_uppercase[:blocks])
+            random.shuffle(all_blocks)
+            state = [[] for _ in range(stacks)]
+            for block in all_blocks:
+                stack_choice = random.choice(state)
+                stack_choice.append(block)
+            return state
 
-    # Function to generate a random state
-    def generate_random_state(stacks, blocks):
-        all_blocks = list(string.ascii_uppercase[:blocks])
-        random.shuffle(all_blocks)
-        state = [[] for _ in range(stacks)]
-        for block in all_blocks:
-            stack_choice = random.choice(state)
-            stack_choice.append(block)
-        return state
+        # Generate a random initial and goal state
+        startSt = generate_random_state(stacks, blocks)
+        finalSt = generate_random_state(stacks, blocks)
 
+        print("Initial State:")
+        visualize_blocks_world(startSt)
+        print("Goal State:")
+        visualize_blocks_world(finalSt)
 
-    # Generate a random initial and goal state
-    startSt = generate_random_state(stacks, blocks)
-    finalSt = generate_random_state(stacks, blocks)
+        class NodeBlocks:
+            def __init__(self, elements, goal_state, parent=None):
+                self.state = elements
+                self.goal_state = goal_state
+                self.parent = parent
+                self.cost = 0
+                if parent:
+                    self.cost = parent.cost + 1
 
-    print("Initial State:")
-    visualize_blocks_world(startSt)
-    print("Goal State:")
+            def goalTest(self):
+                if self.state == self.goal_state:
+                    print("Solution Found!")
+                    self.traceback()
+                    return True
+                else:
+                    return False
 
-    visualize_blocks_world(finalSt)
+            def heuristics(self):
+                return sum(1 for i, stack in enumerate(self.state) if stack != self.goal_state[i])
 
+            def getSuccessors(self, heuristic):
+                children = []
+                for i, stack in enumerate(self.state):
+                    for j, stack1 in enumerate(self.state):
+                        if i != j and len(stack1):
+                            temp = copy.deepcopy(stack)
+                            child = copy.deepcopy(self)
+                            temp1 = copy.deepcopy(stack1)
+                            temp.append(temp1[-1])
+                            del temp1[-1]
+                            child.state[i] = temp
+                            child.state[j] = temp1
+                            child.parent = copy.deepcopy(self)
+                            children.append(child)
+                return children
 
-    class NodeBlocks:
-        def __init__(self, elements, goal_state, parent=None):
-            self.state = elements
-            self.goal_state = goal_state
-            self.parent = parent
-            self.cost = 0
-            if parent:
-                self.cost = parent.cost + 1
+            def traceback(self):
+                s, path_back = self, []
+                while s:
+                    path_back.append(s.state)
+                    s = s.parent
 
-        def goalTest(self):
-            if self.state == self.goal_state:
-                print("Solution Found!")
-                self.traceback()
-                return True
-            else:
-                return False
+                print('Number of MOVES required:', len(path_back) - 1)
+                print('-------------------------------------------------')
+                print("List of nodes forming the path from the root to the goal.")
+                for state in reversed(path_back):
+                    visualize_blocks_world(state)
 
-        def heuristics(self):
-            return sum(1 for i, stack in enumerate(self.state) if stack != self.goal_state[i])
-
-        def getSuccessors(self, heuristic):
-            children = []
-            for i, stack in enumerate(self.state):
-                for j, stack1 in enumerate(self.state):
-                    if i != j and len(stack1):
-                        temp = copy.deepcopy(stack)
-                        child = copy.deepcopy(self)
-                        temp1 = copy.deepcopy(stack1)
-                        temp.append(temp1[-1])
-                        del temp1[-1]
-                        child.state[i] = temp
-                        child.state[j] = temp1
-                        child.parent = copy.deepcopy(self)
-                        children.append(child)
-            return children
-
-        def traceback(self):
-            s, path_back = self, []
-            while s:
-                path_back.append(s.state)
-                s = s.parent
-
-            print('Number of MOVES required:', len(path_back) - 1)
-            print('-------------------------------------------------')
-            print("List of nodes forming the path from the root to the goal.")
-            for state in reversed(path_back):
-                visualize_blocks_world(state)
-
-        def pathCost(self):
-            return self.heuristics() + self.cost
+            def pathCost(self):
+                return self.heuristics() + self.cost
 
 
-    aStarSearch(NodeBlocks(startSt, finalSt), lambda state: 0)
+        aStarSearch(NodeBlocks(startSt, finalSt), lambda state: 0)
 
-# ----------------------------------
-
-
+# ---------------------------------- OLD CODE ----------------------------------
 
     elif choice == 2:
 
