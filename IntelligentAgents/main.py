@@ -96,7 +96,7 @@ def visualize_blocks_world(state):
             if level < len(stack):
                 visualization += f"  {stack[level]}  "
             else:
-                visualization += "  |  "
+                visualization += "  .  "
         visualization += "\n"
 
     visualization += "-----" * len(state) + "\n"
@@ -114,15 +114,31 @@ def visualize_water_jugs(state, capacities):
     visualization = ""
     max_capacity = max(capacities)
 
-    for level in reversed(range(max_capacity + 1)):
-        for i in range(len(state)):
-            if state[i] >= level:
-                visualization += "  [#]  "
-            elif level == 0:
-                visualization += f" [{capacities[i]}] "
+    for level in range(max_capacity, 0, -1):
+        line = ""
+        for i, amount in enumerate(state):
+            if amount >= level:
+                line += f" |   █   |  "
             else:
-                visualization += "  [ ]  "
-        visualization += "\n"
+                line += f" |         |  "
+        visualization += line.rstrip() + "\n"
+
+    bottom_line = ""
+    for i in range(len(state)):
+        bottom_line += " |______|  "
+    visualization += bottom_line.rstrip() + "\n"
+
+    # state_line = ""
+    # for i, amount in enumerate(state):
+    #     amount_str = str(amount)
+    #     padding = (10 - len(amount_str)) // 2
+    #     state_line += f"{' ' * padding}{amount_str}{' ' * (10 - len(amount_str) - padding)}"
+    # visualization += state_line.rstrip() + "\n"
+
+    state_line = ""
+    for i, amount in enumerate(state):
+        state_line += f"      {amount}        "
+    visualization += state_line.rstrip() + "\n"
 
     print(visualization)
 
@@ -142,6 +158,7 @@ while True:
             stacks = int(input("Stacks: "))
             blocks = int(input("Blocks: "))
 
+
         # Function to generate a random state
         def generate_random_state(stacks, blocks):
             all_blocks = list(string.ascii_uppercase[:blocks])
@@ -152,6 +169,7 @@ while True:
                 stack_choice.append(block)
             return state
 
+
         # Generate a random initial and goal state
         startSt = generate_random_state(stacks, blocks)
         finalSt = generate_random_state(stacks, blocks)
@@ -160,6 +178,7 @@ while True:
         visualize_blocks_world(startSt)
         print("Goal State:")
         visualize_blocks_world(finalSt)
+
 
         class NodeBlocks:
             def __init__(self, elements, goal_state, parent=None):
@@ -216,7 +235,7 @@ while True:
         aStarSearch(NodeBlocks(startSt, finalSt), lambda state: 0)
 
 
-    elif choice == 3 :
+    elif choice == 3:
 
         print("Water Jug Manual has been selected")
 
@@ -316,10 +335,10 @@ while True:
         print("Visualized Goal State:")
         visualize_water_jugs(goal_state, capacities_list)
 
-        aStarSearch(NodeWater(tuple(initial_state), tuple(goal_state), [], 0, 0), waterHeuristic)
+        # aStarSearch(NodeWater(tuple(initial_state), tuple(goal_state), [], 0, 0), waterHeuristic)
 
     elif choice == 1:
-        print("Blocks World Manual1 has been selected")
+        print("Blocks World Manual has been selected")
 
         stacks, blocks, initial_state, goal_state = get_user_blocks_world_data()
 
