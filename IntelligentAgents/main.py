@@ -11,9 +11,6 @@ class PriorityQueue:
         self.heap = []
         self.count = 0
 
-    def lenHeap(self):
-        return len(self.heap)
-
     def push(self, item, priority):
         entry = (priority, self.count, item)
         heapq.heappush(self.heap, entry)
@@ -31,17 +28,10 @@ class PriorityQueue:
 def aStarSearch(node, heuristic=lambda state: 0):
     closed = set()
     Q = PriorityQueue()
-    startNode = node
-    Q.push(startNode, startNode.pathCost())
-    visited = 0
+    Q.push(node, node.pathCost())
 
-    while True:
-        if Q.isEmpty():
-            print('Solution is not possible, goal state is not achievable from the given problem state.')
-            return "sol not found"
-
+    while not Q.isEmpty():
         node = Q.pop()
-        visited += 1
 
         if node.goalTest():
             return "Solution found"
@@ -51,21 +41,95 @@ def aStarSearch(node, heuristic=lambda state: 0):
             for childNode in node.getSuccessors(heuristic):
                 Q.push(childNode, childNode.pathCost())
 
+    print('Solution is not possible, goal state is not achievable from the given problem state.')
+    return "sol not found"
+
 
 # Text menu in Python
 def print_menu():
     print(30 * "-", "MENU", 30 * "-")
     print("1. Blocks World")
     print("2. Water Jug")
-    print("3. Exit")
+    print("3. Water Jug Auto")
+    print("4. Blocks World Manual")
+    print("5. Exit")
     print(67 * "-")
 
 
-loop = True
+def generate_random_water_jug_data():
+    num_jugs = random.randint(2, 5)  # Random number of jugs between 2 and 5
+    capacities_list = [random.randint(5, 20) for _ in range(num_jugs)]  # Random capacities between 5 and 20
+    initial_state = [random.randint(0, cap) for cap in capacities_list]  # Random initial amounts
+    goal_state = [random.randint(0, cap) for cap in capacities_list]  # Random goal amounts
 
-while loop:
+    return num_jugs, capacities_list, initial_state, goal_state
+
+
+def get_user_blocks_world_data():
+    stacks = int(input("Enter number of stacks: "))
+    blocks = int(input("Enter number of blocks: "))
+
+    initial_state = []
+    print("Enter the initial state for each stack (e.g., A B C for stack 1, D E for stack 2):")
+    for i in range(stacks):
+        stack = input(f"Stack {i + 1}: ").strip().split()
+        initial_state.append(stack)
+
+    goal_state = []
+    print("Enter the goal state for each stack (e.g., A B C for stack 1, D E for stack 2):")
+    for i in range(stacks):
+        stack = input(f"Goal Stack {i + 1}: ").strip().split()
+        goal_state.append(stack)
+
+    return stacks, blocks, initial_state, goal_state
+
+
+def visualize_blocks_world(state):
+    """
+    Visualizes the state of the Blocks World problem as stacks of blocks.
+    """
+    max_height = max(len(stack) for stack in state)
+    visualization = ""
+
+    for level in reversed(range(max_height)):
+        for stack in state:
+            if level < len(stack):
+                visualization += f"  {stack[level]}  "
+            else:
+                visualization += "  |  "
+        visualization += "\n"
+
+    visualization += "-----" * len(state) + "\n"
+    for i in range(len(state)):
+        visualization += f"  {i + 1}  "
+    visualization += "\n"
+
+    print(visualization)
+
+
+def visualize_water_jugs(state, capacities):
+    """
+    Visualizes the state of the Water Jug problem using symbols to represent the water levels.
+    """
+    visualization = ""
+    max_capacity = max(capacities)
+
+    for level in reversed(range(max_capacity + 1)):
+        for i in range(len(state)):
+            if state[i] >= level:
+                visualization += "  [#]  "
+            elif level == 0:
+                visualization += f" [{capacities[i]}] "
+            else:
+                visualization += "  [ ]  "
+        visualization += "\n"
+
+    print(visualization)
+
+
+while True:
     print_menu()
-    choice = int(input("Enter your choice [1-3]: "))
+    choice = int(input("Enter your choice [1-5]: "))
 
     if choice == 1:
         print("Blocks World has been selected")
@@ -78,81 +142,83 @@ while loop:
             blocks = int(input("Blocks: "))
 
 
-        # Function to generate a random state
-        def generate_random_state(stacks, blocks):
-            all_blocks = list(string.ascii_uppercase[:blocks])
-            random.shuffle(all_blocks)
-
-            state = [[] for _ in range(stacks)]
-
-            for block in all_blocks:
-                stack_choice = random.choice(state)
-                stack_choice.append(block)
-
-            return state
+    # Function to generate a random state
+    def generate_random_state(stacks, blocks):
+        all_blocks = list(string.ascii_uppercase[:blocks])
+        random.shuffle(all_blocks)
+        state = [[] for _ in range(stacks)]
+        for block in all_blocks:
+            stack_choice = random.choice(state)
+            stack_choice.append(block)
+        return state
 
 
-        # Generate a random initial and goal state
-        startSt = generate_random_state(stacks, blocks)
-        finalSt = generate_random_state(stacks, blocks)
+    # Generate a random initial and goal state
+    startSt = generate_random_state(stacks, blocks)
+    finalSt = generate_random_state(stacks, blocks)
 
-        print("Initial State:", startSt)
-        print("Goal State:", finalSt)
+    print("Initial State:")
+    visualize_blocks_world(startSt)
+    print("Goal State:")
 
-
-        class NodeBlocks:
-            def __init__(self, elements, goal_state, parent=None):
-                self.state = elements
-                self.goal_state = goal_state
-                self.parent = parent
-                self.cost = 0
-                if parent:
-                    self.cost = parent.cost + 1
-
-            def goalTest(self):
-                if self.state == self.goal_state:
-                    print("Solution Found!")
-                    self.traceback()
-                    return True
-                else:
-                    return False
-
-            def heuristics(self):
-                return sum(1 for i, stack in enumerate(self.state) if stack != self.goal_state[i])
-
-            def getSuccessors(self, heuristic):
-                children = []
-                for i, stack in enumerate(self.state):
-                    for j, stack1 in enumerate(self.state):
-                        if i != j and len(stack1):
-                            temp = copy.deepcopy(stack)
-                            child = copy.deepcopy(self)
-                            temp1 = copy.deepcopy(stack1)
-                            temp.append(temp1[-1])
-                            del temp1[-1]
-                            child.state[i] = temp
-                            child.state[j] = temp1
-                            child.parent = copy.deepcopy(self)
-                            children.append(child)
-                return children
-
-            def traceback(self):
-                s, path_back = self, []
-                while s:
-                    path_back.append(s.state)
-                    s = s.parent
-
-                print('Number of MOVES required:', len(path_back) - 1)
-                print('-------------------------------------------------')
-                print("List of nodes forming the path from the root to the goal.")
-                for i in list(reversed(path_back)):
-                    print(i)
-
-            def pathCost(self):
-                return self.heuristics() + self.cost
+    visualize_blocks_world(finalSt)
 
 
-        aStarSearch(NodeBlocks(startSt, finalSt), lambda state: 0)
+    class NodeBlocks:
+        def __init__(self, elements, goal_state, parent=None):
+            self.state = elements
+            self.goal_state = goal_state
+            self.parent = parent
+            self.cost = 0
+            if parent:
+                self.cost = parent.cost + 1
+
+        def goalTest(self):
+            if self.state == self.goal_state:
+                print("Solution Found!")
+                self.traceback()
+                return True
+            else:
+                return False
+
+        def heuristics(self):
+            return sum(1 for i, stack in enumerate(self.state) if stack != self.goal_state[i])
+
+        def getSuccessors(self, heuristic):
+            children = []
+            for i, stack in enumerate(self.state):
+                for j, stack1 in enumerate(self.state):
+                    if i != j and len(stack1):
+                        temp = copy.deepcopy(stack)
+                        child = copy.deepcopy(self)
+                        temp1 = copy.deepcopy(stack1)
+                        temp.append(temp1[-1])
+                        del temp1[-1]
+                        child.state[i] = temp
+                        child.state[j] = temp1
+                        child.parent = copy.deepcopy(self)
+                        children.append(child)
+            return children
+
+        def traceback(self):
+            s, path_back = self, []
+            while s:
+                path_back.append(s.state)
+                s = s.parent
+
+            print('Number of MOVES required:', len(path_back) - 1)
+            print('-------------------------------------------------')
+            print("List of nodes forming the path from the root to the goal.")
+            for state in reversed(path_back):
+                visualize_blocks_world(state)
+
+        def pathCost(self):
+            return self.heuristics() + self.cost
+
+
+    aStarSearch(NodeBlocks(startSt, finalSt), lambda state: 0)
+
+# ----------------------------------
 
 
 
