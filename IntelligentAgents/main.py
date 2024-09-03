@@ -45,7 +45,7 @@ def aStarSearch(node, heuristic=lambda state: 0):
     return "sol not found"
 
 
-# Text menu in Python
+# Text menu
 def print_menu():
     print(30 * "-", "MENU", 30 * "-")
     print("1. Blocks World Manual")
@@ -54,34 +54,6 @@ def print_menu():
     print("4. Water Jug Auto")
     print("5. Exit")
     print(67 * "-")
-
-
-def generate_random_water_jug_data():
-    num_jugs = random.randint(2, 5)  # Random number of jugs between 2 and 5
-    capacities_list = [random.randint(5, 20) for _ in range(num_jugs)]  # Random capacities between 5 and 20
-    initial_state = [random.randint(0, cap) for cap in capacities_list]  # Random initial amounts
-    goal_state = [random.randint(0, cap) for cap in capacities_list]  # Random goal amounts
-
-    return num_jugs, capacities_list, initial_state, goal_state
-
-
-def get_user_blocks_world_data():
-    stacks = int(input("Enter number of stacks: "))
-    blocks = int(input("Enter number of blocks: "))
-
-    initial_state = []
-    print("Enter the initial state for each stack (e.g., A B C for stack 1, D E for stack 2):")
-    for i in range(stacks):
-        stack = input(f"Stack {i + 1}: ").strip().split()
-        initial_state.append(stack)
-
-    goal_state = []
-    print("Enter the goal state for each stack (e.g., A B C for stack 1, D E for stack 2):")
-    for i in range(stacks):
-        stack = input(f"Goal Stack {i + 1}: ").strip().split()
-        goal_state.append(stack)
-
-    return stacks, blocks, initial_state, goal_state
 
 
 def visualize_blocks_world(state):
@@ -108,8 +80,6 @@ def visualize_blocks_world(state):
     visualization += "\n"
 
     print(visualization)
-
-
 
 
 def visualize_water_jugs(state, capacities):
@@ -324,6 +294,15 @@ while True:
 
         print("Water Jug Auto has been selected")
 
+
+        def generate_random_water_jug_data():
+            num_jugs = random.randint(2, 5)  # Random number of jugs between 2 and 5
+            capacities_list = [random.randint(5, 20) for _ in range(num_jugs)]  # Random capacities between 5 and 20
+            initial_state = [random.randint(0, cap) for cap in capacities_list]  # Random initial amounts
+            goal_state = [random.randint(0, cap) for cap in capacities_list]  # Random goal amounts
+
+            return num_jugs, capacities_list, initial_state, goal_state
+
         num_jugs, capacities_list, initial_state, goal_state = generate_random_water_jug_data()
 
         print(f"Generated Data: Jugs = {num_jugs}, Capacities = {capacities_list}")
@@ -339,6 +318,26 @@ while True:
 
     elif choice == 1:
         print("Blocks World Manual has been selected")
+
+
+        def get_user_blocks_world_data():
+            stacks = int(input("Enter number of stacks: "))
+            blocks = int(input("Enter number of blocks: "))
+
+            initial_state = []
+            print("Enter the initial state for each stack (e.g., A B C for stack 1, D E for stack 2):")
+            for i in range(stacks):
+                stack = input(f"Stack {i + 1}: ").strip().split()
+                initial_state.append(stack)
+
+            goal_state = []
+            print("Enter the goal state for each stack (e.g., A B C for stack 1, D E for stack 2):")
+            for i in range(stacks):
+                stack = input(f"Goal Stack {i + 1}: ").strip().split()
+                goal_state.append(stack)
+
+            return stacks, blocks, initial_state, goal_state
+
 
         stacks, blocks, initial_state, goal_state = get_user_blocks_world_data()
 
