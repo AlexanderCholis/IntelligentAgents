@@ -155,6 +155,7 @@ while True:
 
         print(f"Randomly generated {stacks} stacks and {blocks} blocks.")
 
+
         # Function to generate a random state
         def generate_random_state(stacks, blocks):
             all_blocks = list(string.ascii_uppercase[:blocks])
@@ -164,6 +165,7 @@ while True:
                 stack_choice = random.choice(state)
                 stack_choice.append(block)
             return state
+
 
         # Generate a random initial and goal state
         startSt = generate_random_state(stacks, blocks)
@@ -226,6 +228,7 @@ while True:
             def pathCost(self):
                 return self.heuristics() + self.cost
 
+
         # Run the A* algorithm
         aStarSearch(NodeBlocks(startSt, finalSt), lambda state: 0)
 
@@ -257,19 +260,19 @@ while True:
         def getSuccessorsWater(state):
             successors = []
             capacities = capacities_list
-            for idx in range(len(state)):
-                if state[idx] < capacities[idx]:
-                    successors.append((state[:idx] + (capacities[idx],) + state[idx + 1:], f'Fill Jug {idx + 1}', 1))
-                if state[idx] > 0:
-                    successors.append((state[:idx] + (0,) + state[idx + 1:], f'Empty Jug {idx + 1}', 1))
+            for i in range(len(state)):
+                if state[i] < capacities[i]:
+                    successors.append((state[:i] + (capacities[i],) + state[i + 1:], f'Fill Jug {i + 1}', 1))
+                if state[i] > 0:
+                    successors.append((state[:i] + (0,) + state[i + 1:], f'Empty Jug {i + 1}', 1))
                 for j in range(len(state)):
-                    if idx != j:
-                        transfer_amount = min(state[idx], capacities[j] - state[j])
+                    if i != j:
+                        transfer_amount = min(state[i], capacities[j] - state[j])
                         if transfer_amount > 0:
                             new_state = list(state)
-                            new_state[idx] -= transfer_amount
+                            new_state[i] -= transfer_amount
                             new_state[j] += transfer_amount
-                            successors.append((tuple(new_state), f'Pour from Jug {idx + 1} to Jug {j + 1}', 1))
+                            successors.append((tuple(new_state), f'Pour from Jug {i + 1} to Jug {j + 1}', 1))
             return successors
 
 
@@ -306,30 +309,36 @@ while True:
                     return True
                 return False
 
-
         print("Initial State:")
         visualize_water_jugs(initial_state, capacities_list)
         print("Goal State:")
         visualize_water_jugs(goal_state, capacities_list)
-
         aStarSearch(NodeWater(tuple(initial_state), tuple(goal_state), [], 0, 0), waterHeuristic)
 
     elif choice == 4:
 
         print("Water Jug Auto has been selected")
 
-        num_jugs, capacities_list, initial_state, goal_state = generate_random_water_jug_data()
+        num_jugs, capacities_list, initial_state, goal_statew = generate_random_water_jug_data()
 
         print(f"Generated Data: Jugs = {num_jugs}, Capacities = {capacities_list}")
         print("Initial State:", initial_state)
-        print("Goal State:", goal_state)
+        print("Goal State:", goal_statew)
 
         print("Visualized Initial State:")
         visualize_water_jugs(initial_state, capacities_list)
         print("Visualized Goal State:")
-        visualize_water_jugs(goal_state, capacities_list)
+        visualize_water_jugs(goal_statew, capacities_list)
 
         # aStarSearch(NodeWater(tuple(initial_state), tuple(goal_state), [], 0, 0), waterHeuristic)
+        solution = aStarSearch(NodeWater(tuple(initial_state), tuple(goal_statew), [], 0, 0), waterHeuristic)
+
+
+        def goalTest(self):
+            if self.state == self.goal_statew:
+                print("Solution Found! Path to goal:", self.path)
+                return True
+            return False
 
     elif choice == 1:
 
