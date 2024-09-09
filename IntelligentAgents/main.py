@@ -110,8 +110,6 @@ def visualize_blocks_world(state):
     print(visualization)
 
 
-
-
 def visualize_water_jugs(state, capacities):
     """
     Visualizes the state of the Water Jug problem using symbols to represent the water levels.
@@ -151,12 +149,11 @@ while True:
 
         print("Blocks World Auto has been selected")
 
-        stacks = int(input("Stacks: "))
-        blocks = int(input("Blocks: "))
-        while stacks < 0 or blocks < 0:
-            print("Please enter positive numbers only.")
-            stacks = int(input("Stacks: "))
-            blocks = int(input("Blocks: "))
+        # Generate random number of stacks and blocks
+        stacks = random.randint(3, 5)  # Random number of stacks between 3 and 5
+        blocks = random.randint(5, 10)  # Random number of blocks between 5 and 10
+
+        print(f"Randomly generated {stacks} stacks and {blocks} blocks.")
 
         # Function to generate a random state
         def generate_random_state(stacks, blocks):
@@ -167,7 +164,6 @@ while True:
                 stack_choice = random.choice(state)
                 stack_choice.append(block)
             return state
-
 
         # Generate a random initial and goal state
         startSt = generate_random_state(stacks, blocks)
@@ -230,9 +226,8 @@ while True:
             def pathCost(self):
                 return self.heuristics() + self.cost
 
-
+        # Run the A* algorithm
         aStarSearch(NodeBlocks(startSt, finalSt), lambda state: 0)
-
 
     elif choice == 3:
 
@@ -337,6 +332,7 @@ while True:
         # aStarSearch(NodeWater(tuple(initial_state), tuple(goal_state), [], 0, 0), waterHeuristic)
 
     elif choice == 1:
+
         print("Blocks World Manual has been selected")
 
         stacks, blocks, initial_state, goal_state = get_user_blocks_world_data()
