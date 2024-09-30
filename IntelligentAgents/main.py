@@ -103,6 +103,80 @@ def visualize_blocks_world(state):
 
 
 
+
+# Function to check if the current state is the goal state
+def is_goal_state(state, target):
+    return state == target
+
+
+# Function to pour water from one jug to another
+def pour_water(state, from_jug, to_jug, capacities):
+    new_state = list(state)
+    transfer_amount = min(state[from_jug], capacities[to_jug] - state[to_jug])
+    new_state[from_jug] -= transfer_amount
+    new_state[to_jug] += transfer_amount
+    return tuple(new_state)
+
+
+# Function to get all possible next states from the current state
+def get_next_states(state, capacities):
+    next_states = []
+    jug_count = len(capacities)
+    # Generate all combinations of pouring between the jugs
+    for i in range(jug_count):
+        for j in range(jug_count):
+            if i != j:
+                next_states.append(pour_water(state, i, j, capacities))
+    return next_states
+
+
+# BFS function to solve the water jug problem
+def water_jug_bfs(initial_stateW, capacities, target_state):
+    queue = deque([initial_stateW])
+    visited = set([initial_stateW])
+    parent = {initial_stateW: None}  # To keep track of the path
+
+    while queue:
+        current_state = queue.popleft()
+
+        # Check if we reached the goal state
+        if is_goal_state(current_state, target_state):
+            # Reconstruct the path
+            path = []
+            while current_state is not None:
+                path.append(current_state)
+                current_state = parent[current_state]
+            return path[::-1]  # Return reversed path (from start to goal)
+
+        # Get all possible next states and explore them
+        for next_state in get_next_states(current_state, capacities):
+            if next_state not in visited:
+                visited.add(next_state)
+                parent[next_state] = current_state
+                queue.append(next_state)
+
+    # If no solution is found
+    return None
+
+
+# Function to generate a random initial state
+def generate_random_state(capacities):
+    return tuple(random.randint(0, capacity) for capacity in capacities)
+
+
+# Function to generate a random goal state with the same total water
+def generate_random_goal_state(initial_stateW, capacities):
+    total_water = sum(initial_stateW)
+
+    # Randomly distribute the total water across the jugs
+    while True:
+        goal_stateW = [random.randint(0, capacities[i]) for i in range(len(capacities))]
+        if sum(goal_stateW) == total_water:
+            return tuple(goal_stateW)
+
+
+
+
 while True:
     print_menu()
     choice = int(input("Enter your choice [1-5]: "))
