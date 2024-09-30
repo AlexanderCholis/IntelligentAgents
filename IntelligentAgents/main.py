@@ -1,8 +1,8 @@
-import sys
 import heapq, random
 import string
 import copy
-import numpy as np
+from collections import deque
+from colorama import Fore, Style
 
 
 # PriorityQueue class
@@ -41,28 +41,19 @@ def aStarSearch(node, heuristic=lambda state: 0):
             for childNode in node.getSuccessors(heuristic):
                 Q.push(childNode, childNode.pathCost())
 
-    print('Solution is not possible, goal state is not achievable from the given problem state.')
+    print(f"{Fore.RED}Solution is not possible, goal state is not achievable from the given problem state.{Style.RESET_ALL}")
     return "sol not found"
 
 
 # Text menu in Python
 def print_menu():
-    print(30 * "-", "MENU", 30 * "-")
-    print("1. Blocks World Manual")
-    print("2. Blocks World Auto")
-    print("3. Water Jug Manual")
-    print("4. Water Jug Auto")
-    print("5. Exit")
+    print(30 * "-", f"{Fore.GREEN}MENU{Style.RESET_ALL}", 30 * "-")
+    print(f"{Fore.BLUE}1. Blocks World Manual{Style.RESET_ALL}")
+    print(f"{Fore.BLUE}2. Blocks World Auto{Style.RESET_ALL}")
+    print(f"{Fore.BLUE}3. Water Jug Manual{Style.RESET_ALL}")
+    print(f"{Fore.BLUE}4. Water Jug Auto{Style.RESET_ALL}")
+    print(f"{Fore.BLUE}5. Exit{Style.RESET_ALL}")
     print(67 * "-")
-
-
-def generate_random_water_jug_data():
-    num_jugs = random.randint(2, 5)  # Random number of jugs between 2 and 5
-    capacities_list = [random.randint(5, 20) for _ in range(num_jugs)]  # Random capacities between 5 and 20
-    initial_state = [random.randint(0, cap) for cap in capacities_list]  # Random initial amounts
-    goal_state = [random.randint(0, cap) for cap in capacities_list]  # Random goal amounts
-
-    return num_jugs, capacities_list, initial_state, goal_state
 
 
 def get_user_blocks_world_data():
@@ -110,35 +101,6 @@ def visualize_blocks_world(state):
     print(visualization)
 
 
-def visualize_water_jugs(state, capacities):
-    """
-    Visualizes the state of the Water Jug problem using symbols to represent the water levels.
-    """
-    visualization = ""
-    max_capacity = max(capacities)
-
-    for level in reversed(range(max_capacity + 1)):
-        for i in range(len(state)):
-            if state[i] >= level:
-                visualization += "  | ⊟ |  "
-            elif level == 0:
-                visualization += f" [{capacities[i]}] "
-            else:
-                visualization += "  |   |  "
-        visualization += "\n"
-
-    bottom_line = ""
-    for i in range(len(state)):
-        bottom_line += "  |___|  "
-    visualization += bottom_line.rstrip() + "\n"
-
-    state_line = ""
-    for i, amount in enumerate(state):
-        state_line += (f"    {amount}  "
-                       f"  ")
-    visualization += state_line.rstrip() + "\n"
-
-    print(visualization)
 
 
 while True:
@@ -219,9 +181,9 @@ while True:
                     path_back.append(s.state)
                     s = s.parent
 
-                print('Number of MOVES required:', len(path_back) - 1)
-                print('-------------------------------------------------')
-                print("List of nodes forming the path from the root to the goal.")
+                print(f"{Fore.GREEN}Number of MOVES required:{Style.RESET_ALL}", len(path_back) - 1)
+                print(f"{Fore.GREEN}-------------------------------------------------{Style.RESET_ALL}")
+                print(f"{Fore.GREEN}List of nodes forming the path from the root to the goal.{Style.RESET_ALL}")
                 for state in reversed(path_back):
                     visualize_blocks_world(state)
 
@@ -236,109 +198,9 @@ while True:
 
         print("Water Jug Manual has been selected")
 
-        num_jugs = int(input("Enter number of jugs: "))
-        capacities_list = []
-        initial_state = []
-        goal_state = []
-
-        # Input capacities
-        for i in range(num_jugs):
-            capacity = int(input(f"Capacity of Jug {i + 1}: "))
-            capacities_list.append(capacity)
-
-        # Input initial amounts
-        for i in range(num_jugs):
-            amount = int(input(f"Initial amount in Jug {i + 1}: "))
-            initial_state.append(amount)
-
-        # Input goal amounts
-        for i in range(num_jugs):
-            amount = int(input(f"Goal amount in Jug {i + 1}: "))
-            goal_state.append(amount)
-
-
-        def getSuccessorsWater(state):
-            successors = []
-            capacities = capacities_list
-            for i in range(len(state)):
-                if state[i] < capacities[i]:
-                    successors.append((state[:i] + (capacities[i],) + state[i + 1:], f'Fill Jug {i + 1}', 1))
-                if state[i] > 0:
-                    successors.append((state[:i] + (0,) + state[i + 1:], f'Empty Jug {i + 1}', 1))
-                for j in range(len(state)):
-                    if i != j:
-                        transfer_amount = min(state[i], capacities[j] - state[j])
-                        if transfer_amount > 0:
-                            new_state = list(state)
-                            new_state[i] -= transfer_amount
-                            new_state[j] += transfer_amount
-                            successors.append((tuple(new_state), f'Pour from Jug {i + 1} to Jug {j + 1}', 1))
-            return successors
-
-
-        def waterHeuristic(state):
-            return sum(abs(state[i] - goal_state[i]) for i in range(len(state)))
-
-
-        class NodeWater:
-            def __init__(self, state, goal_state, path, cost=0, heuristic=0):
-                self.state = state
-                self.goal_state = goal_state
-                self.path = path
-                self.cost = cost
-                self.heuristic = heuristic
-
-            def getSuccessors(self, heuristicFunction=None):
-                children = []
-                for successor in getSuccessorsWater(self.state):
-                    state = successor[0]
-                    path = list(self.path)
-                    path.append(successor[1])
-                    cost = self.cost + successor[2]
-                    heuristic = heuristicFunction(state) if heuristicFunction else 0
-                    node = NodeWater(state, self.goal_state, path, cost, heuristic)
-                    children.append(node)
-                return children
-
-            def pathCost(self):
-                return self.cost + self.heuristic
-
-            def goalTest(self):
-                if self.state == self.goal_state:
-                    print("Solution Found! Path to goal:", self.path)
-                    return True
-                return False
-
-        print("Initial State:")
-        visualize_water_jugs(initial_state, capacities_list)
-        print("Goal State:")
-        visualize_water_jugs(goal_state, capacities_list)
-        aStarSearch(NodeWater(tuple(initial_state), tuple(goal_state), [], 0, 0), waterHeuristic)
-
     elif choice == 4:
 
         print("Water Jug Auto has been selected")
-
-        num_jugs, capacities_list, initial_state, goal_statew = generate_random_water_jug_data()
-
-        print(f"Generated Data: Jugs = {num_jugs}, Capacities = {capacities_list}")
-        print("Initial State:", initial_state)
-        print("Goal State:", goal_statew)
-
-        print("Visualized Initial State:")
-        visualize_water_jugs(initial_state, capacities_list)
-        print("Visualized Goal State:")
-        visualize_water_jugs(goal_statew, capacities_list)
-
-        # aStarSearch(NodeWater(tuple(initial_state), tuple(goal_state), [], 0, 0), waterHeuristic)
-        solution = aStarSearch(NodeWater(tuple(initial_state), tuple(goal_statew), [], 0, 0), waterHeuristic)
-
-
-        def goalTest(self):
-            if self.state == self.goal_statew:
-                print("Solution Found! Path to goal:", self.path)
-                return True
-            return False
 
     elif choice == 1:
 
@@ -393,9 +255,9 @@ while True:
                     path_back.append(s.state)
                     s = s.parent
 
-                print('Number of MOVES required:', len(path_back) - 1)
-                print('-------------------------------------------------')
-                print("List of nodes forming the path from the root to the goal.")
+                print(f"{Fore.GREEN}Number of MOVES required:{Style.RESET_ALL}", len(path_back) - 1)
+                print(f"{Fore.GREEN}-------------------------------------------------{Style.RESET_ALL}")
+                print(f"{Fore.GREEN}List of nodes forming the path from the root to the goal.{Style.RESET_ALL}")
                 for state in reversed(path_back):
                     visualize_blocks_world(state)
 
