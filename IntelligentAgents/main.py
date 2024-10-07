@@ -101,6 +101,7 @@ def visualize_blocks_world(state):
     print(visualization)
 
 
+# Function to visualize the current state of the Water Jug problem
 def visualize_water_jugs(state, capacities):
     """
     Visualizes the state of the Water Jug problem using symbols to represent the water levels.
@@ -134,7 +135,6 @@ def visualize_water_jugs(state, capacities):
     visualization += state_line.rstrip() + "\n"
 
     print(visualization)
-
 
 
 # Function to check if the current state is the goal state
@@ -215,6 +215,7 @@ def solve_manual_water_jug_problem():
         print(f"{Fore.RED}Number of jugs must be between 2 and 4.{Style.RESET_ALL}")
         return
 
+    # Get user input for jug capacities
     capacities = []
     for i in range(num_jugs):
         capacity = int(input(f"Enter the capacity of jug {i + 1}: "))
@@ -304,7 +305,6 @@ def solve_random_water_jug_problem():
             visualize_water_jugs(step, capacities)
     else:
         print(f"{Fore.RED}No solution found.{Style.RESET_ALL}")
-
 
 
 while True:
@@ -398,17 +398,15 @@ while True:
         # Run the A* algorithm
         aStarSearch(NodeBlocks(startSt, finalSt), lambda state: 0)
 
-
     elif choice == 3:
 
         print("Water Jug Manual has been selected")
-
         solve_manual_water_jug_problem()
+
 
     elif choice == 4:
 
         print("Water Jug Auto has been selected")
-
         solve_random_water_jug_problem()
 
     elif choice == 1:
