@@ -2,10 +2,9 @@ import heapq, random
 import string
 import copy
 from collections import deque
-from colorama import Fore, Style
+from colorama import Fore, Style, init
 
 
-# PriorityQueue class
 class PriorityQueue:
     def __init__(self):
         self.heap = []
@@ -101,7 +100,40 @@ def visualize_blocks_world(state):
     print(visualization)
 
 
+# Function to visualize the current state of the Water Jug problem
+def visualize_water_jugs(state, capacities):
+    """
+    Visualizes the state of the Water Jug problem using symbols to represent the water levels.
+    The filled boxes (⊟) and empty boxes are consistently aligned.
+    """
+    visualization = ""
+    max_capacity = max(capacities)
 
+    for level in reversed(range(max_capacity + 1)):
+        for i in range(len(state)):
+            if state[i] >= level:
+                # visualization += " | ⊟ | "
+                visualization += f" | {Fore.CYAN}⊟{Style.RESET_ALL} | "
+            else:
+                if level == 0:
+                    # visualization += f" [{capacities[i]:2}] "  # Capacity of each jug displayed on the bottom
+                    visualization += f" [{Fore.YELLOW}{capacities[i]:2}{Style.RESET_ALL}] "
+                else:
+                    visualization += " |     | "
+        visualization += "\n"
+
+    bottom_line = ""
+    for _ in range(len(state)):
+        bottom_line += " |___| "
+    visualization += bottom_line.rstrip() + "\n"
+
+    state_line = ""
+    for amount in state:
+        # state_line += f"  {amount:2}  "  # Show the current amount in each jug
+        state_line += f"  {Fore.YELLOW}{amount:2}  {Style.RESET_ALL}  "
+    visualization += state_line.rstrip() + "\n"
+
+    print(visualization)
 
 
 # Function to check if the current state is the goal state
@@ -175,6 +207,104 @@ def generate_random_goal_state(initial_stateW, capacities):
             return tuple(goal_stateW)
 
 
+# Function for manual water jug problem
+def solve_manual_water_jug_problem():
+    # Get user input for number of jugs
+    num_jugs = int(input("Enter the number of jugs (2 to 4): "))
+    if num_jugs < 2 or num_jugs > 4:
+        print(f"{Fore.RED}Number of jugs must be between 2 and 4.{Style.RESET_ALL}")
+        return
+
+    # Get user input for jug capacities
+    capacities = []
+    for i in range(num_jugs):
+        capacity = int(input(f"Enter the capacity of jug {i + 1}: "))
+        capacities.append(capacity)
+
+    capacities = tuple(capacities)
+
+    # Get user input for the initial state
+    initial_stateW = []
+    for i in range(num_jugs):
+        initial_amount = int(input(f"Enter the initial amount of water in jug {i + 1} (0 to {capacities[i]}): "))
+        if initial_amount > capacities[i]:
+            print(f"{Fore.RED}Initial amount of water in jug {i + 1} cannot exceed its capacity.{Style.RESET_ALL}")
+            return
+        initial_stateW.append(initial_amount)
+
+    initial_stateW = tuple(initial_stateW)
+
+    # Get user input for the goal state
+    goal_stateW = []
+    for i in range(num_jugs):
+        goal_amount = int(input(f"Enter the goal amount of water in jug {i + 1} (0 to {capacities[i]}): "))
+        if goal_amount > capacities[i]:
+            print(f"Goal amount of water in jug {i + 1} cannot exceed its capacity.")
+            return
+        goal_stateW.append(goal_amount)
+
+    goal_stateW = tuple(goal_stateW)
+
+    print(f"\nManual Initial State: {initial_stateW}")
+    print(f"Manual Goal State: {goal_stateW}\n")
+
+    # Visualize initial state
+    print("Initial State Visualization:")
+    visualize_water_jugs(initial_stateW, capacities)
+
+    # Visualize goal state
+    print("Goal State Visualization:")
+    visualize_water_jugs(goal_stateW, capacities)
+
+    # Solve the problem using BFS
+    solution_path = water_jug_bfs(initial_stateW, capacities, goal_stateW)
+
+    if solution_path:
+        print(f"{Fore.GREEN}Solution found in {len(solution_path) - 1} steps:{Style.RESET_ALL}\n")
+        for step_num, step in enumerate(solution_path):
+            print(f"Step {step_num}: {step}")
+            visualize_water_jugs(step, capacities)
+    else:
+        print(f"{Fore.RED}No solution found.{Style.RESET_ALL}")
+
+
+# Function for automatic water jug problem
+def solve_random_water_jug_problem():
+    # Random number of jugs between 2 and 4
+    num_jugs = random.randint(2, 4)
+
+    # Set random capacities for each jug (between 1 and 10 liters)
+    capacities = tuple(random.randint(1, 10) for _ in range(num_jugs))
+
+    # Generate a random initial state
+    initial_stateW = generate_random_state(capacities)
+
+    # Generate a random goal state with the same total water
+    goal_stateW = generate_random_goal_state(initial_stateW, capacities)
+
+    print(f"Random Number of Jugs: {num_jugs}")
+    print(f"Random Jug Capacities: {capacities}")
+    print(f"Random Initial State: {initial_stateW}")
+    print(f"Random Goal State: {goal_stateW}\n")
+
+    # Visualize initial state
+    print("Initial State Visualization:")
+    visualize_water_jugs(initial_stateW, capacities)
+
+    # Visualize goal state
+    print("Goal State Visualization:")
+    visualize_water_jugs(goal_stateW, capacities)
+
+    # Find the solution using BFS
+    solution_path = water_jug_bfs(initial_stateW, capacities, goal_stateW)
+
+    if solution_path:
+        print(f"{Fore.GREEN}Solution found in {len(solution_path) - 1} steps:{Style.RESET_ALL}\n")
+        for step_num, step in enumerate(solution_path):
+            print(f"Step {step_num}: {step}")
+            visualize_water_jugs(step, capacities)
+    else:
+        print(f"{Fore.RED}No solution found.{Style.RESET_ALL}")
 
 
 while True:
@@ -190,7 +320,6 @@ while True:
         blocks = random.randint(5, 10)  # Random number of blocks between 5 and 10
 
         print(f"Randomly generated {stacks} stacks and {blocks} blocks.")
-
 
         # Function to generate a random state
         def generate_random_state(stacks, blocks):
@@ -272,9 +401,13 @@ while True:
 
         print("Water Jug Manual has been selected")
 
+        solve_manual_water_jug_problem()
+
     elif choice == 4:
 
         print("Water Jug Auto has been selected")
+
+        solve_random_water_jug_problem()
 
     elif choice == 1:
 
