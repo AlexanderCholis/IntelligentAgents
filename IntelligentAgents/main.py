@@ -41,7 +41,8 @@ def aStarSearch(node, heuristic=lambda state: 0):
             for childNode in node.getSuccessors(heuristic):
                 Q.push(childNode, childNode.pathCost())
 
-    print(f"{Fore.RED}Solution is not possible, goal state is not achievable from the given problem state.{Style.RESET_ALL}")
+    print(
+        f"{Fore.RED}Solution is not possible, goal state is not achievable from the given problem state.{Style.RESET_ALL}")
     return "sol not found"
 
 
@@ -206,6 +207,7 @@ def generate_random_goal_state(initial_stateW, capacities):
         goal_stateW = [random.randint(0, capacities[i]) for i in range(len(capacities))]
         if sum(goal_stateW) == total_water:
             return tuple(goal_stateW)
+
 
 # Function for manual water jug problem
 def solve_manual_water_jug_problem():
@@ -402,7 +404,6 @@ while True:
 
         print("Water Jug Manual has been selected")
         solve_manual_water_jug_problem()
-
 
     elif choice == 4:
 
